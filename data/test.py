@@ -1,5 +1,11 @@
-from nselib import capital_market
+from nselib import derivatives
+from datetime import datetime, timedelta
 
-summary, df = capital_market.total_traded_stocks()
+# कल की तारीख (क्योंकि FII data अक्सर T+1 होता है)
+trade_date = (datetime.now() - timedelta(days=1)).strftime("%d-%m-%Y")
 
-print(df.columns.tolist())
+print("Trade Date:", trade_date)
+
+data = derivatives.fii_derivatives_statistics(trade_date)
+
+print(data)

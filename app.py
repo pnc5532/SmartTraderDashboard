@@ -6,13 +6,14 @@ from data.gainers_losers import get_top_gainers, get_top_losers
 from data.market_data import get_market_data
 from streamlit_autorefresh import st_autorefresh
 from components.market_breadth import show_market_breadth
+from components.fii_dii import show_fii_dii
 
 st.set_page_config(
     page_title="Smart Trader Dashboard",
     page_icon="📈",
     layout="wide"
 )
-st_autorefresh(interval=5000, key="refresh")
+st_autorefresh(interval=30000, key="refresh")
 
 st.title("📈 Smart Trader Dashboard")
 
@@ -106,7 +107,10 @@ with right:
         st.dataframe(losers, use_container_width=True)
     else:
         st.error("Unable to load Top Losers.")
-        st.divider()
+
+st.divider()
+
+show_fii_dii()
 
 st.subheader("🌍 Global Markets")
 
