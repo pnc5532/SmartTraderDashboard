@@ -1,19 +1,80 @@
 import streamlit as st
+from data.sector_heatmap import get_sector_data
+
 
 def show_heatmap():
 
     st.subheader("🔥 NSE Sector Heatmap")
 
-    col1, col2, col3, col4 = st.columns(4)
+    data = get_sector_data()
 
-    col1.success("🏦 BANK")
-    col2.success("💻 IT")
-    col3.error("💊 PHARMA")
-    col4.success("🚗 AUTO")
+    if data is None:
+        st.error("Unable to load Sector Data")
+        return
 
-    col5, col6, col7, col8 = st.columns(4)
+    # Sort sectors by performance
+    ranking = data.sort_values("percentChange", ascending=False)
 
-    col5.error("⚙️ METAL")
-    col6.success("🏠 REALTY")
-    col7.error("⚡ ENERGY")
-    col8.success("📡 FMCG")
+    # Strongest / Weakest
+    best = ranking.iloc[0]
+    worst = ranking.iloc[-1]
+
+    c1, c2, c3 = st.columns(3)
+
+    c1.metric(
+        "🏆 Strongest Sector",
+        best["index"],
+        f"{best['percentChange']:.2f}%"
+    )
+
+    c2.metric(
+        "📉 Weakest Sector",
+        worst["index"],
+        f"{worst['percentChange']:.2f}%"
+    )
+
+    avg_change = ranking["percentChange"].mean()
+
+    if avg_change > 0:
+        sentiment = "🟢 Bullish"
+    elif avg_change < 0:
+        sentiment = "🔴 Bearish"
+    else:
+        sentiment = "🟡 Neutral"
+
+    c3.metric(
+        "📊 Market Sentiment",
+        sentiment
+    )
+
+    st.divider()
+
+    st.subheader("🏆 Sector Ranking")
+
+    st.dataframe(
+        ranking[["index", "percentChange"]],
+        hide_index=True,
+        use_container_width=True,
+    )
+
+    st.divider()
+
+    st.subheader("🟩 Sector Heatmap")
+
+    col1, col2, col3 = st.columns(3)
+    cols = [col1, col2, col3]
+
+    for i, (_, row) in enumerate(ranking.iterrows()):
+
+        card = f"""
+### {row['index']}
+
+**{row['percentChange']:.2f}%**
+
+Breadth : {row['advances']} ↑ / {row['declines']} ↓
+"""
+
+        if row["percentChange"] >= 0:
+            cols[i % 3].success(card)
+        else:
+            cols[i % 3].error(card)

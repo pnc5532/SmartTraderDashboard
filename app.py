@@ -16,6 +16,10 @@ st.set_page_config(
 st_autorefresh(interval=30000, key="refresh")
 
 st.title("📈 Smart Trader Dashboard")
+st.markdown("""
+    ### 📊 Professional Trading Terminal
+    Real-time Market • FII Activity • Global Markets • Trading Dashboard
+""")
 
 st.subheader("📊 Live Market Indices")
 

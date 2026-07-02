@@ -1,11 +1,3 @@
-from nselib import derivatives
-from datetime import datetime, timedelta
+from sector_heatmap import get_sector_data
 
-# कल की तारीख (क्योंकि FII data अक्सर T+1 होता है)
-trade_date = (datetime.now() - timedelta(days=1)).strftime("%d-%m-%Y")
-
-print("Trade Date:", trade_date)
-
-data = derivatives.fii_derivatives_statistics(trade_date)
-
-print(data)
+print(get_sector_data())
