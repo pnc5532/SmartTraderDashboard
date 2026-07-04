@@ -1,7 +1,12 @@
 from nselib import derivatives
 
-data = derivatives.nse_live_option_chain("NIFTY")
 
-print(type(data))
+def get_option_chain(symbol="NIFTY"):
 
-print(data)
+    try:
+        data = derivatives.nse_live_option_chain(symbol)
+        return data
+
+    except Exception as e:
+        print(e)
+        return None

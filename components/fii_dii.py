@@ -12,4 +12,7 @@ def show_fii_dii():
         st.error("Unable to load FII Data")
         return
 
-    st.dataframe(data, use_container_width=True)
+    st.dataframe(
+    data,
+    width="stretch"
+)

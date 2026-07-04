@@ -7,13 +7,18 @@ from data.market_data import get_market_data
 from streamlit_autorefresh import st_autorefresh
 from components.market_breadth import show_market_breadth
 from components.fii_dii import show_fii_dii
+from components.sector_stocks import show_sector_stocks
+from components.option_chain import show_option_chain
+from components.momentum_scanner import show_momentum_scanner
+from data.market_breadth import get_market_breadth
+
 
 st.set_page_config(
     page_title="Smart Trader Dashboard",
     page_icon="📈",
     layout="wide"
 )
-st_autorefresh(interval=30000, key="refresh")
+st_autorefresh(interval=300000, key="refresh")
 
 st.title("📈 Smart Trader Dashboard")
 st.markdown("""
@@ -139,13 +144,25 @@ for name, col in markets:
         )
     else:
         col.metric(name, "N/A")
-        st.divider()
-show_heatmap()
-st.divider()
-show_chart()
-st.divider()
-show_market_breadth()
-from data.market_breadth import get_market_breadth
 
-st.write("DEBUG:")
-st.write(get_market_breadth())
+show_heatmap()
+
+st.divider()
+
+show_momentum_scanner()
+
+st.divider()
+
+show_sector_stocks()
+
+st.divider()
+
+show_market_breadth()
+
+st.divider()
+
+show_chart()
+
+st.divider()
+
+#show_option_chain()
