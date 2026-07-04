@@ -1,0 +1,10 @@
+FINANCIAL = [
+
+    "BAJFINANCE",
+    "BAJAJFINSV",
+    "CHOLAFIN",
+    "SHRIRAMFIN",
+    "MUTHOOTFIN",
+    "LICHSGFIN"
+
+]

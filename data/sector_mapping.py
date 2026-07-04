@@ -1,44 +1,53 @@
+from data.sectors.bank import BANK
+from data.sectors.it import IT
+from data.sectors.auto import AUTO
+from data.sectors.pharma import PHARMA
+from data.sectors.metal import METAL
+from data.sectors.power import POWER
+from data.sectors.energy import ENERGY
+from data.sectors.fmcg import FMCG
+from data.sectors.capital_goods import CAPITAL_GOODS
+from data.sectors.defence import DEFENCE
+from data.sectors.railway import RAILWAY
+from data.sectors.financial import FINANCIAL
+from data.sectors.insurance import INSURANCE
+from data.sectors.telecom import TELECOM
+from data.sectors.realty import REALTY
+from data.sectors.chemical import CHEMICAL
+
+
 SECTORS = {
 
-    "NIFTY BANK": [
-        "HDFCBANK",
-        "ICICIBANK",
-        "SBIN",
-        "AXISBANK",
-        "KOTAKBANK",
-        "INDUSINDBK",
-        "BANKBARODA",
-        "PNB",
-        "FEDERALBNK",
-        "IDFCFIRSTB",
-        "AUBANK",
-        "CANBK"
-    ],
+    "BANK": BANK,
 
-    "NIFTY IT": [
-        "TCS",
-        "INFY",
-        "HCLTECH",
-        "TECHM",
-        "WIPRO",
-        "LTIM",
-        "PERSISTENT",
-        "COFORGE",
-        "MPHASIS",
-        "OFSS"
-    ],
+    "IT": IT,
 
-    "AUTO": [
-        "TATAMOTORS",
-        "M&M",
-        "ASHOKLEY",
-        "MARUTI",
-        "BAJAJ-AUTO",
-        "EICHERMOT",
-        "HEROMOTOCO",
-        "TVSMOTOR",
-        "EXIDEIND",
-        "MOTHERSON"
-    ]
+    "AUTO": AUTO,
+
+    "PHARMA": PHARMA,
+
+    "METAL": METAL,
+
+    "POWER": POWER,
+
+    "ENERGY": ENERGY,
+
+    "FMCG": FMCG,
+
+    "CAPITAL GOODS": CAPITAL_GOODS,
+
+    "DEFENCE": DEFENCE,
+
+    "RAILWAY": RAILWAY,
+
+    "FINANCIAL": FINANCIAL,
+
+    "INSURANCE": INSURANCE,
+
+    "TELECOM": TELECOM,
+
+    "REALTY": REALTY,
+
+    "CHEMICAL": CHEMICAL
 
 }

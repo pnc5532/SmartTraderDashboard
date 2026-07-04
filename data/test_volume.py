@@ -1,18 +1,12 @@
-from sector_mapping import SECTORS
-from volume_scanner import check_volume_condition
+from nselib import capital_market
 
-# NIFTY BANK Sector Stocks
-stocks = SECTORS["NIFTY BANK"]
+data = capital_market.price_volume_data(
+    symbol="AUBANK",
+    period="1M"
+)
 
-print(f"Scanning {len(stocks)} NIFTY BANK Stocks...\n")
+print("===== COLUMNS =====")
+print(data.columns)
 
-for symbol in stocks:
-
-    result = check_volume_condition(symbol)
-
-    if result is None:
-        continue
-
-    print("=" * 40)
-    print(symbol)
-    print(result)
+print("\n===== FIRST 5 ROWS =====")
+print(data.head())

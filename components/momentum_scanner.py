@@ -9,10 +9,9 @@ from data.breakout_scanner import check_breakout
 def show_momentum_scanner():
 
     st.subheader("🎯 Momentum Scanner")
-    st.error("MOMENTUM SCANNER V2")
 
     sector = st.selectbox(
-        "Select Sector",
+        "📂 Select Sector",
         list(SECTORS.keys()),
         key="scanner_sector"
     )
@@ -21,7 +20,7 @@ def show_momentum_scanner():
 
     rows = []
 
-    with st.spinner("Scanning Stocks..."):
+    with st.spinner("🔍 Scanning Stocks..."):
 
         for symbol in stocks:
 
@@ -38,37 +37,42 @@ def show_momentum_scanner():
             score = 0
             reason = []
 
-            # -----------------------------
-            # Volume > 2 x Average
-            # -----------------------------
+            # -------------------------
+            # Volume > Avg20
+            # -------------------------
+
             if volume["pass_avg20"]:
                 score += 25
                 reason.append("2X Volume")
 
-            # -----------------------------
+            # -------------------------
             # Highest Volume in 15 Days
-            # -----------------------------
+            # -------------------------
+
             if volume["pass_high15"]:
                 score += 25
-                reason.append("15D Highest Vol")
+                reason.append("15D High Vol")
 
-            # -----------------------------
-            # Bullish Breakout
-            # -----------------------------
+            # -------------------------
+            # Bull Breakout
+            # -------------------------
+
             if breakout["bull_breakout"]:
                 score += 25
-                reason.append("Bull Breakout")
+                reason.append("Bull Break")
 
-            # -----------------------------
-            # Bearish Breakdown
-            # -----------------------------
+            # -------------------------
+            # Bear Breakdown
+            # -------------------------
+
             if breakout["bear_breakdown"]:
                 score += 25
-                reason.append("Bear Breakdown")
+                reason.append("Bear Break")
 
-            # -----------------------------
+            # -------------------------
             # Signal
-            # -----------------------------
+            # -------------------------
+
             signal = "WATCH"
 
             if breakout["bull_breakout"]:
@@ -99,8 +103,7 @@ def show_momentum_scanner():
 
     if len(rows) == 0:
 
-        st.warning("No Stocks Found.")
-
+        st.warning("No Momentum Stocks Found.")
         return
 
     df = pd.DataFrame(rows)

@@ -1,0 +1,6 @@
+TELECOM = [
+
+    "BHARTIARTL",
+    "INDUSTOWER"
+
+]
