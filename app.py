@@ -11,6 +11,7 @@ from components.sector_stocks import show_sector_stocks
 from components.option_chain import show_option_chain
 from components.momentum_scanner import show_momentum_scanner
 from data.market_breadth import get_market_breadth
+from components.volume_momentum_scanner import show_volume_momentum_scanner
 
 
 st.set_page_config(
@@ -149,6 +150,12 @@ show_heatmap()
 
 st.divider()
 
+st.write("Volume Scanner Loaded")
+
+show_volume_momentum_scanner()
+
+st.divider()
+
 show_momentum_scanner()
 
 st.divider()
@@ -165,4 +172,4 @@ show_chart()
 
 st.divider()
 
-#show_option_chain()
+# show_option_chain()

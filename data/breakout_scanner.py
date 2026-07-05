@@ -11,7 +11,6 @@ def check_breakout(symbol):
             period="1M"
         )
 
-        # Convert HighPrice safely
         high = pd.to_numeric(
             data["HighPrice"]
             .astype(str)
@@ -19,7 +18,6 @@ def check_breakout(symbol):
             errors="coerce"
         )
 
-        # Convert LowPrice safely
         low = pd.to_numeric(
             data["LowPrice"]
             .astype(str)
@@ -27,11 +25,9 @@ def check_breakout(symbol):
             errors="coerce"
         )
 
-        # Remove invalid values
         high = high.dropna()
         low = low.dropna()
 
-        # Need at least 3 trading days
         if len(high) < 3 or len(low) < 3:
             return None
 
@@ -39,7 +35,7 @@ def check_breakout(symbol):
         today_high = high.iloc[0]
         today_low = low.iloc[0]
 
-        # Previous 2 Days High & Low
+        # Previous 2 Days
         prev2_high = high.iloc[1:3].max()
         prev2_low = low.iloc[1:3].min()
 

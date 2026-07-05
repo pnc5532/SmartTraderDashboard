@@ -3,6 +3,7 @@ import pandas as pd
 
 from data.sector_mapping import SECTORS
 from data.volume_scanner import check_volume_condition
+from data.breakout_scanner import check_breakout
 
 
 def show_volume_momentum_scanner():
@@ -19,33 +20,119 @@ def show_volume_momentum_scanner():
 
     rows = []
 
-    with st.spinner("Scanning Stocks..."):
+    with st.spinner("🔍 Scanning Stocks..."):
 
         for symbol in stocks:
+
+            # -------------------------
+            # Volume Data
+            # -------------------------
 
             volume = check_volume_condition(symbol)
 
             if volume is None:
                 continue
 
-            if volume["pass_avg20"]:
+            # -------------------------
+            # Breakout Data
+            # -------------------------
 
-                today_volume = volume["today"]
-                avg20_volume = volume["avg20"]
+            breakout = check_breakout(symbol)
 
-                ratio = volume["ratio"]
+            if breakout is None:
+                continue
 
-                rows.append({
+            ratio = volume["ratio"]
 
-                    "Stock": symbol,
+            # Only show Volume Ratio >= 2
+            if ratio < 2:
+                continue
 
-                    "Today's Volume": f"{today_volume:,.0f}",
+            today_volume = volume["today"]
+            avg20_volume = volume["avg20"]
 
-                    "20 Day Avg": f"{avg20_volume:,.0f}",
+            # -------------------------
+            # Price Change
+            # -------------------------
 
-                    "Volume Ratio": f"{ratio} X"
+            price_change = (
+                (volume["close"] - volume["prev_close"])
+                / volume["prev_close"]
+            ) * 100
 
-                })
+            # -------------------------
+            # Action
+            # -------------------------
+
+            if breakout["bull_breakout"] and price_change > 0:
+
+                action = "🟢 BUY CE"
+
+            elif breakout["bear_breakdown"] and price_change < 0:
+
+                action = "🔴 BUY PE"
+
+            else:
+
+                action = "👀 WATCH"
+
+            # -------------------------
+            # Volume Status
+            # -------------------------
+
+            if ratio >= 3:
+
+                status = "🔥 Extreme"
+
+            elif ratio >= 2.5:
+
+                status = "🟢 High"
+
+            else:
+
+                status = "🟡 Good"
+
+            # -------------------------
+            # Price Trend
+            # -------------------------
+
+            if price_change >= 3:
+
+                price_signal = "🟢 Strong"
+
+            elif price_change > 0:
+
+                price_signal = "🟡 Positive"
+
+            else:
+
+                price_signal = "🔴 Weak"
+
+            # -------------------------
+            # Add Row
+            # -------------------------
+
+            rows.append({
+
+                "Stock": symbol,
+
+                "Ratio": ratio,
+
+                "Volume Ratio": f"{ratio:.2f}x",
+
+                "Price %": f"{price_change:.2f}%",
+
+                "Price Trend": price_signal,
+
+                "Today's Volume": f"{today_volume:,.0f}",
+
+                "20 Day Avg": f"{avg20_volume:,.0f}",
+
+                "Volume Status": status,
+
+                "Action": action
+
+            })
 
     if len(rows) == 0:
 
@@ -54,18 +141,17 @@ def show_volume_momentum_scanner():
 
     df = pd.DataFrame(rows)
 
-    df["Sort"] = (
-        df["Volume Ratio"]
-        .str.replace(" X", "", regex=False)
-        .astype(float)
-    )
-
+    # Sort by Highest Volume Ratio
     df = df.sort_values(
-        by="Sort",
+        by="Ratio",
         ascending=False
     )
 
-    df = df.drop(columns=["Sort"])
+    # Rank
+    df.insert(0, "Rank", range(1, len(df) + 1))
+
+    # Remove helper column
+    df = df.drop(columns=["Ratio"])
 
     st.success(f"✅ {len(df)} Qualified Stocks Found")
 

@@ -34,8 +34,15 @@ def check_volume_condition(symbol):
 
             "pass_avg20": today >= avg20 * 2,
 
-            "pass_high15": today >= high15
+            "pass_high15": today >= high15,
 
+            "close": float(
+                str(data["ClosePrice"].iloc[0]).replace(",", "")
+            ),
+
+            "prev_close": float(
+                str(data["PrevClose"].iloc[0]).replace(",", "")
+            )
         }
 
     except Exception as e:

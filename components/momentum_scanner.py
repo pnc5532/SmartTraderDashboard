@@ -38,7 +38,7 @@ def show_momentum_scanner():
             reason = []
 
             # -------------------------
-            # Volume > Avg20
+            # Volume > 2X Avg20
             # -------------------------
 
             if volume["pass_avg20"]:
@@ -70,16 +70,31 @@ def show_momentum_scanner():
                 reason.append("Bear Break")
 
             # -------------------------
-            # Signal
+            # Signal Logic
             # -------------------------
 
-            signal = "WATCH"
+            if score >= 75:
 
-            if breakout["bull_breakout"]:
-                signal = "🟢 BUY CE"
+                if breakout["bull_breakout"]:
+                    signal = "🟢 BUY CE"
 
-            elif breakout["bear_breakdown"]:
-                signal = "🔴 BUY PE"
+                elif breakout["bear_breakdown"]:
+                    signal = "🔴 BUY PE"
+
+                else:
+                    signal = "🟢 ENTRY"
+
+            elif score >= 50:
+
+                signal = "🟡 READY"
+
+            elif score >= 25:
+
+                signal = "👀 WATCH"
+
+            else:
+
+                signal = "❌ IGNORE"
 
             rows.append({
 
