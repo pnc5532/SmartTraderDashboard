@@ -1,37 +1,34 @@
 import streamlit as st
 from data.sector_stocks import get_fno_stocks
 from data.sector_mapping import SECTORS
+from data.sector_mapping import SECTORS, HEATMAP_TO_SECTOR
 
 
 def show_sector_stocks():
 
-    st.subheader("📋 NSE F&O Stocks")
+    # कोई sector select नहीं हुआ
+    if "selected_sector" not in st.session_state:
+        return
+
+    heatmap_sector = st.session_state["selected_sector"]
+
+    sector = HEATMAP_TO_SECTOR.get(
+        heatmap_sector,
+        heatmap_sector
+    )
+
+    st.subheader(f"📋 {sector} Stocks")
 
     data = get_fno_stocks()
 
-    sector = st.selectbox(
-        "🏦 Select Sector",
-        ["All"] + list(SECTORS.keys())
-    )
+    symbols = SECTORS.get(sector, [])
 
-    if sector != "All":
-        symbols = SECTORS[sector]
-        data = data[data["symbol"].isin(symbols)]
+    data = data[data["symbol"].isin(symbols)]
 
-    search = st.text_input(
-        "🔍 Search F&O Stock",
-        placeholder="Type stock symbol..."
-    )
-
-    if search:
-        data = data[
-            data["symbol"].str.contains(search.upper(), na=False)
-        ]
-
-    st.write(f"Total F&O Stocks : {len(data)}")
+    st.success(f"{len(data)} Stocks Found")
 
     st.dataframe(
-    data,
-    hide_index=True,
-    width="stretch"
-)
+        data,
+        hide_index=True,
+        width="stretch"
+    )

@@ -16,6 +16,10 @@ from data.sectors.realty import REALTY
 from data.sectors.chemical import CHEMICAL
 
 
+# ==========================================
+# Sector Lists
+# ==========================================
+
 SECTORS = {
 
     "BANK": BANK,
@@ -49,5 +53,42 @@ SECTORS = {
     "REALTY": REALTY,
 
     "CHEMICAL": CHEMICAL
+
+}
+
+
+# ==========================================
+# Heatmap Sector → Internal Sector Mapping
+# ==========================================
+
+HEATMAP_TO_SECTOR = {
+
+    "NIFTY BANK": "BANK",
+
+    "NIFTY PSU BANK": "BANK",
+
+    "NIFTY PRIVATE BANK": "BANK",
+
+    "NIFTY IT": "IT",
+
+    "NIFTY AUTO": "AUTO",
+
+    "NIFTY PHARMA": "PHARMA",
+
+    "NIFTY METAL": "METAL",
+
+    "NIFTY ENERGY": "ENERGY",
+
+    "NIFTY FMCG": "FMCG",
+
+    "NIFTY REALTY": "REALTY",
+
+    "NIFTY TELECOM": "TELECOM",
+
+    "NIFTY FINANCIAL SERVICES": "FINANCIAL",
+
+    "NIFTY FINANCIAL": "FINANCIAL",
+
+    "NIFTY CAPITAL GOODS": "CAPITAL GOODS"
 
 }

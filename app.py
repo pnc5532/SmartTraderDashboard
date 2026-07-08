@@ -1,6 +1,7 @@
 import streamlit as st
 from components.chart import show_chart
 from data.global_markets import get_global_markets
+from components.fo_market_leaders import show_fo_market_leaders
 from components.heatmap import show_heatmap
 from data.gainers_losers import get_top_gainers, get_top_losers
 from data.market_data import get_market_data
@@ -12,6 +13,8 @@ from components.option_chain import show_option_chain
 from components.momentum_scanner import show_momentum_scanner
 from data.market_breadth import get_market_breadth
 from components.volume_momentum_scanner import show_volume_momentum_scanner
+
+
 
 
 st.set_page_config(
@@ -146,17 +149,17 @@ for name, col in markets:
     else:
         col.metric(name, "N/A")
 
+st.error("AFTER GLOBAL MARKETS")
+
 show_heatmap()
 
 st.divider()
 
-st.write("Volume Scanner Loaded")
-
-show_volume_momentum_scanner()
+show_fo_market_leaders()
 
 st.divider()
 
-show_momentum_scanner()
+show_volume_momentum_scanner()
 
 st.divider()
 
@@ -164,12 +167,23 @@ show_sector_stocks()
 
 st.divider()
 
-show_market_breadth()
+show_momentum_scanner()
 
 st.divider()
 
-show_chart()
+# Market Breadth
 
 st.divider()
 
-# show_option_chain()
+#show_global_markets()
+
+st.divider()
+
+show_option_chain()
+
+st.divider()
+
+show_fii_dii()
+
+st.divider()
+

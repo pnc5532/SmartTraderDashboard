@@ -4,7 +4,7 @@ REALTY = [
     "LODHA",
     "GODREJPROP",
     "OBEROIRLTY",
-    "PRESTIGE"
+    "PRESTIGE",
     "PHOENIXLTD"
 
 ]

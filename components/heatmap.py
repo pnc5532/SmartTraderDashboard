@@ -78,3 +78,9 @@ Breadth : {row['advances']} ↑ / {row['declines']} ↓
             cols[i % 3].success(card)
         else:
             cols[i % 3].error(card)
+
+        if cols[i % 3].button(
+            "📋 View Stocks",
+            key=f"btn_{row['index']}"
+        ):
+            st.session_state["selected_sector"] = row["index"]    

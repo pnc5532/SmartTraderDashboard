@@ -4,6 +4,7 @@ import pandas as pd
 from data.sector_mapping import SECTORS
 from data.volume_scanner import check_volume_condition
 from data.breakout_scanner import check_breakout
+from data.signal_time import update_signal_time
 
 
 def show_momentum_scanner():
@@ -38,10 +39,20 @@ def show_momentum_scanner():
             reason = []
 
             # -------------------------
-            # Volume > 2X Avg20
+            # Price Change
+            # -------------------------
+
+            price_change = (
+                (volume["close"] - volume["prev_close"])
+                / volume["prev_close"]
+            ) * 100
+
+            # -------------------------
+            # 2X Average Volume
             # -------------------------
 
             if volume["pass_avg20"]:
+
                 score += 25
                 reason.append("2X Volume")
 
@@ -50,6 +61,7 @@ def show_momentum_scanner():
             # -------------------------
 
             if volume["pass_high15"]:
+
                 score += 25
                 reason.append("15D High Vol")
 
@@ -58,6 +70,7 @@ def show_momentum_scanner():
             # -------------------------
 
             if breakout["bull_breakout"]:
+
                 score += 25
                 reason.append("Bull Break")
 
@@ -66,22 +79,73 @@ def show_momentum_scanner():
             # -------------------------
 
             if breakout["bear_breakdown"]:
+
                 score += 25
                 reason.append("Bear Break")
 
             # -------------------------
-            # Signal Logic
+            # Price Strength Bonus
             # -------------------------
 
-            if score >= 75:
+            if price_change >= 5:
+
+                score += 20
+                reason.append("Strong Price")
+
+            elif price_change >= 3:
+
+                score += 15
+                reason.append("Price Up")
+
+            elif price_change >= 1:
+
+                score += 10
+                reason.append("Positive Price")
+
+            # -------------------------
+            # Volume Ratio Bonus
+            # -------------------------
+
+            if volume["ratio"] >= 3:
+
+                score += 10
+                reason.append("3X Volume")
+
+            elif volume["ratio"] >= 2.5:
+
+                score += 5
+                reason.append("2.5X Volume")
+
+            # -------------------------
+            # Signal
+            # -------------------------
+
+            if score >= 90:
 
                 if breakout["bull_breakout"]:
+
+                    signal = "🔥 STRONG BUY CE"
+
+                elif breakout["bear_breakdown"]:
+
+                    signal = "🔥 STRONG BUY PE"
+
+                else:
+
+                    signal = "🔥 STRONG"
+
+            elif score >= 75:
+
+                if breakout["bull_breakout"]:
+
                     signal = "🟢 BUY CE"
 
                 elif breakout["bear_breakdown"]:
+
                     signal = "🔴 BUY PE"
 
                 else:
+
                     signal = "🟢 ENTRY"
 
             elif score >= 50:
@@ -96,11 +160,20 @@ def show_momentum_scanner():
 
                 signal = "❌ IGNORE"
 
+            signal_time = update_signal_time(
+                symbol,
+                signal
+            )
+
             rows.append({
 
                 "Stock": symbol,
 
                 "Score": score,
+
+                "Price %": f"{price_change:.2f}%",
+
+                "Vol Ratio": f"{volume['ratio']:.2f}x",
 
                 "Volume": "✅" if volume["pass_avg20"] else "❌",
 
@@ -111,6 +184,8 @@ def show_momentum_scanner():
                 "Bear": "🔴" if breakout["bear_breakdown"] else "-",
 
                 "Signal": signal,
+
+                "Signal Time": signal_time,
 
                 "Reason": ", ".join(reason)
 
@@ -124,8 +199,8 @@ def show_momentum_scanner():
     df = pd.DataFrame(rows)
 
     df = df.sort_values(
-        by="Score",
-        ascending=False
+        by=["Score", "Stock"],
+        ascending=[False, True]
     )
 
     st.success(f"Scanned {len(df)} Stocks")
