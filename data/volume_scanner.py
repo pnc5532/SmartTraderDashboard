@@ -43,6 +43,17 @@ def check_volume_condition(symbol):
             "prev_close": float(
                 str(data["PrevClose"].iloc[0]).replace(",", "")
             )
+            ,
+            "price_change": round(
+                (
+                    float(str(data["ClosePrice"].iloc[0]).replace(",", "")) -
+                    float(str(data["PrevClose"].iloc[0]).replace(",", ""))
+                )
+                /
+                float(str(data["PrevClose"].iloc[0]).replace(",", ""))
+                * 100,
+                2
+            )
         }
 
     except Exception as e:

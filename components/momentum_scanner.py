@@ -35,124 +35,92 @@ def show_momentum_scanner():
             if breakout is None:
                 continue
 
+            price_change = volume["price_change"]
+
             score = 0
             reason = []
 
             # -------------------------
-            # Price Change
-            # -------------------------
-
-            price_change = (
-                (volume["close"] - volume["prev_close"])
-                / volume["prev_close"]
-            ) * 100
-
-            # -------------------------
-            # 2X Average Volume
-            # -------------------------
-
-            if volume["pass_avg20"]:
-
-                score += 25
-                reason.append("2X Volume")
-
-            # -------------------------
-            # Highest Volume in 15 Days
-            # -------------------------
-
-            if volume["pass_high15"]:
-
-                score += 25
-                reason.append("15D High Vol")
-
-            # -------------------------
-            # Bull Breakout
-            # -------------------------
-
-            if breakout["bull_breakout"]:
-
-                score += 25
-                reason.append("Bull Break")
-
-            # -------------------------
-            # Bear Breakdown
-            # -------------------------
-
-            if breakout["bear_breakdown"]:
-
-                score += 25
-                reason.append("Bear Break")
-
-            # -------------------------
-            # Price Strength Bonus
+            # PRICE STRENGTH (Highest Weight)
             # -------------------------
 
             if price_change >= 5:
-
-                score += 20
-                reason.append("Strong Price")
+                score += 40
+                reason.append("🔥 Strong Price")
 
             elif price_change >= 3:
-
-                score += 15
-                reason.append("Price Up")
+                score += 30
+                reason.append("📈 Price Up")
 
             elif price_change >= 1:
+                score += 15
+                reason.append("🟢 Positive")
 
+            elif price_change <= -5:
+                score += 40
+                reason.append("🔻 Strong Fall")
+
+            elif price_change <= -3:
+                score += 30
+                reason.append("📉 Price Down")
+
+            elif price_change <= -1:
+                score += 15
+                reason.append("🔴 Negative")
+
+            # -------------------------
+            # VOLUME
+            # -------------------------
+
+            if volume["pass_avg20"]:
+                score += 20
+                reason.append("2X Volume")
+
+            if volume["pass_high15"]:
                 score += 10
-                reason.append("Positive Price")
-
-            # -------------------------
-            # Volume Ratio Bonus
-            # -------------------------
+                reason.append("15D High Volume")
 
             if volume["ratio"] >= 3:
-
                 score += 10
                 reason.append("3X Volume")
 
             elif volume["ratio"] >= 2.5:
-
                 score += 5
                 reason.append("2.5X Volume")
 
             # -------------------------
-            # Signal
+            # BREAKOUT
             # -------------------------
 
-            if score >= 90:
+            if breakout["bull_breakout"]:
+                score += 30
+                reason.append("Bull Break")
 
-                if breakout["bull_breakout"]:
+            if breakout["bear_breakdown"]:
+                score += 30
+                reason.append("Bear Break")
 
-                    signal = "🔥 STRONG BUY CE"
+            # -------------------------
+            # SIGNAL LOGIC
+            # -------------------------
 
-                elif breakout["bear_breakdown"]:
+            if (
+                breakout["bull_breakout"]
+                and price_change > 0
+                and score >= 70
+            ):
 
-                    signal = "🔥 STRONG BUY PE"
+                signal = "🟢 BUY CE"
 
-                else:
+            elif (
+                breakout["bear_breakdown"]
+                and price_change < 0
+                and score >= 70
+            ):
 
-                    signal = "🔥 STRONG"
-
-            elif score >= 75:
-
-                if breakout["bull_breakout"]:
-
-                    signal = "🟢 BUY CE"
-
-                elif breakout["bear_breakdown"]:
-
-                    signal = "🔴 BUY PE"
-
-                else:
-
-                    signal = "🟢 ENTRY"
+                signal = "🔴 BUY PE"
 
             elif score >= 50:
-
-                signal = "🟡 READY"
-
-            elif score >= 25:
 
                 signal = "👀 WATCH"
 
@@ -198,9 +166,82 @@ def show_momentum_scanner():
 
     df = pd.DataFrame(rows)
 
+    # -------------------------
+    # Numeric Columns
+    # -------------------------
+
+    df["PriceNum"] = (
+        df["Price %"]
+        .str.replace("%", "", regex=False)
+        .astype(float)
+    )
+
+    df["VolNum"] = (
+        df["Vol Ratio"]
+        .str.replace("x", "", regex=False)
+        .astype(float)
+    )
+
+    # -------------------------
+    # Signal Priority
+    # -------------------------
+
+    signal_priority = {
+
+        "🟢 BUY CE": 4,
+
+        "🔴 BUY PE": 4,
+
+        "👀 WATCH": 3,
+
+        "❌ IGNORE": 1
+
+    }
+
+    df["SignalRank"] = df["Signal"].map(signal_priority)
+
+    # -------------------------
+    # FINAL SORTING
+    # -------------------------
+
     df = df.sort_values(
-        by=["Score", "Stock"],
-        ascending=[False, True]
+
+        by=[
+            "SignalRank",
+            "PriceNum",
+            "Score",
+            "VolNum"
+        ],
+
+        ascending=[
+            False,
+            False,
+            False,
+            False
+        ]
+
+    )
+
+    # -------------------------
+    # Rank
+    # -------------------------
+
+    df.insert(
+        0,
+        "Rank",
+        range(1, len(df) + 1)
+    )
+
+    # -------------------------
+    # Cleanup
+    # -------------------------
+
+    df = df.drop(
+        columns=[
+            "SignalRank",
+            "PriceNum",
+            "VolNum"
+        ]
     )
 
     st.success(f"Scanned {len(df)} Stocks")
@@ -208,5 +249,5 @@ def show_momentum_scanner():
     st.dataframe(
         df,
         hide_index=True,
-        use_container_width=True
+        width="stretch"
     )

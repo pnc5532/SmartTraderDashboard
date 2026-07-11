@@ -22,7 +22,7 @@ st.set_page_config(
     page_icon="📈",
     layout="wide"
 )
-st_autorefresh(interval=300000, key="refresh")
+st_autorefresh(interval=60000, key="refresh")
 
 st.title("📈 Smart Trader Dashboard")
 st.markdown("""
