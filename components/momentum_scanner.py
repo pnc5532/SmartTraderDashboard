@@ -1,11 +1,158 @@
 import streamlit as st
 import pandas as pd
+import time
+
+from concurrent.futures import ThreadPoolExecutor
 
 from data.sector_mapping import SECTORS
 from data.volume_scanner import check_volume_condition
 from data.breakout_scanner import check_breakout
 from data.signal_time import update_signal_time
 
+
+def scan_stock(symbol):
+
+    try:
+
+        volume = check_volume_condition(symbol)
+
+        if volume is None:
+            return None
+
+        breakout = check_breakout(symbol)
+
+        if breakout is None:
+            return None
+
+        price_change = volume["price_change"]
+
+        score = 0
+        reason = []
+
+        # -------------------------
+        # PRICE STRENGTH
+        # -------------------------
+
+        if price_change >= 5:
+            score += 40
+            reason.append("🔥 Strong Price")
+
+        elif price_change >= 3:
+            score += 30
+            reason.append("📈 Price Up")
+
+        elif price_change >= 1:
+            score += 15
+            reason.append("🟢 Positive")
+
+        elif price_change <= -5:
+            score += 40
+            reason.append("🔻 Strong Fall")
+
+        elif price_change <= -3:
+            score += 30
+            reason.append("📉 Price Down")
+
+        elif price_change <= -1:
+            score += 15
+            reason.append("🔴 Negative")
+
+        # -------------------------
+        # VOLUME
+        # -------------------------
+
+        if volume["pass_avg20"]:
+            score += 20
+            reason.append("2X Volume")
+
+        if volume["pass_high15"]:
+            score += 10
+            reason.append("15D High Volume")
+
+        if volume["ratio"] >= 3:
+            score += 10
+            reason.append("3X Volume")
+
+        elif volume["ratio"] >= 2.5:
+            score += 5
+            reason.append("2.5X Volume")
+
+        # -------------------------
+        # BREAKOUT
+        # -------------------------
+
+        if breakout["bull_breakout"]:
+            score += 30
+            reason.append("Bull Break")
+
+        if breakout["bear_breakdown"]:
+            score += 30
+            reason.append("Bear Break")
+
+        # -------------------------
+        # SIGNAL
+        # -------------------------
+
+        if (
+            breakout["bull_breakout"]
+            and price_change > 0
+            and score >= 70
+        ):
+
+            signal = "🟢 BUY CE"
+
+        elif (
+            breakout["bear_breakdown"]
+            and price_change < 0
+            and score >= 70
+        ):
+
+            signal = "🔴 BUY PE"
+
+        elif score >= 50:
+
+            signal = "👀 WATCH"
+
+        else:
+
+            signal = "❌ IGNORE"
+
+        signal_time = update_signal_time(
+            symbol,
+            signal
+        )
+
+        return {
+
+            "Stock": symbol,
+
+            "Score": score,
+
+            "Price %": f"{price_change:.2f}%",
+
+            "Vol Ratio": f"{volume['ratio']:.2f}x",
+
+            "Volume": "✅" if volume["pass_avg20"] else "❌",
+
+            "15D Vol": "✅" if volume["pass_high15"] else "❌",
+
+            "Bull": "🟢" if breakout["bull_breakout"] else "-",
+
+            "Bear": "🔴" if breakout["bear_breakdown"] else "-",
+
+            "Signal": signal,
+
+            "Signal Time": signal_time,
+
+            "Reason": ", ".join(reason)
+
+        }
+
+    except Exception as e:
+
+        print(symbol, e)
+
+        return None
 
 def show_momentum_scanner():
 
@@ -19,149 +166,33 @@ def show_momentum_scanner():
 
     stocks = SECTORS[sector]
 
-    rows = []
+    start = time.perf_counter()
 
     with st.spinner("🔍 Scanning Stocks..."):
 
-        for symbol in stocks:
+        max_workers = min(8, len(stocks))
 
-            volume = check_volume_condition(symbol)
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
 
-            if volume is None:
-                continue
-
-            breakout = check_breakout(symbol)
-
-            if breakout is None:
-                continue
-
-            price_change = volume["price_change"]
-
-            score = 0
-            reason = []
-
-            # -------------------------
-            # PRICE STRENGTH (Highest Weight)
-            # -------------------------
-
-            if price_change >= 5:
-                score += 40
-                reason.append("🔥 Strong Price")
-
-            elif price_change >= 3:
-                score += 30
-                reason.append("📈 Price Up")
-
-            elif price_change >= 1:
-                score += 15
-                reason.append("🟢 Positive")
-
-            elif price_change <= -5:
-                score += 40
-                reason.append("🔻 Strong Fall")
-
-            elif price_change <= -3:
-                score += 30
-                reason.append("📉 Price Down")
-
-            elif price_change <= -1:
-                score += 15
-                reason.append("🔴 Negative")
-
-            # -------------------------
-            # VOLUME
-            # -------------------------
-
-            if volume["pass_avg20"]:
-                score += 20
-                reason.append("2X Volume")
-
-            if volume["pass_high15"]:
-                score += 10
-                reason.append("15D High Volume")
-
-            if volume["ratio"] >= 3:
-                score += 10
-                reason.append("3X Volume")
-
-            elif volume["ratio"] >= 2.5:
-                score += 5
-                reason.append("2.5X Volume")
-
-            # -------------------------
-            # BREAKOUT
-            # -------------------------
-
-            if breakout["bull_breakout"]:
-                score += 30
-                reason.append("Bull Break")
-
-            if breakout["bear_breakdown"]:
-                score += 30
-                reason.append("Bear Break")
-
-            # -------------------------
-            # SIGNAL LOGIC
-            # -------------------------
-
-            if (
-                breakout["bull_breakout"]
-                and price_change > 0
-                and score >= 70
-            ):
-
-                signal = "🟢 BUY CE"
-
-            elif (
-                breakout["bear_breakdown"]
-                and price_change < 0
-                and score >= 70
-            ):
-
-                signal = "🔴 BUY PE"
-
-            elif score >= 50:
-
-                signal = "👀 WATCH"
-
-            else:
-
-                signal = "❌ IGNORE"
-
-            signal_time = update_signal_time(
-                symbol,
-                signal
+            rows = list(
+                executor.map(
+                    scan_stock,
+                    stocks
+                )
             )
 
-            rows.append({
+    rows = [r for r in rows if r is not None]
 
-                "Stock": symbol,
+    end = time.perf_counter()
 
-                "Score": score,
-
-                "Price %": f"{price_change:.2f}%",
-
-                "Vol Ratio": f"{volume['ratio']:.2f}x",
-
-                "Volume": "✅" if volume["pass_avg20"] else "❌",
-
-                "15D Vol": "✅" if volume["pass_high15"] else "❌",
-
-                "Bull": "🟢" if breakout["bull_breakout"] else "-",
-
-                "Bear": "🔴" if breakout["bear_breakdown"] else "-",
-
-                "Signal": signal,
-
-                "Signal Time": signal_time,
-
-                "Reason": ", ".join(reason)
-
-            })
+    st.success(
+        f"✅ Scanned {len(stocks)} Stocks in {end-start:.2f} sec"
+    )
 
     if len(rows) == 0:
 
         st.warning("No Momentum Stocks Found.")
+
         return
 
     df = pd.DataFrame(rows)
@@ -201,15 +232,15 @@ def show_momentum_scanner():
     df["SignalRank"] = df["Signal"].map(signal_priority)
 
     # -------------------------
-    # FINAL SORTING
+    # Final Sorting
     # -------------------------
 
     df = df.sort_values(
 
         by=[
             "SignalRank",
-            "PriceNum",
             "Score",
+            "PriceNum",
             "VolNum"
         ],
 
@@ -236,18 +267,21 @@ def show_momentum_scanner():
     # Cleanup
     # -------------------------
 
-    df = df.drop(
+    df.drop(
         columns=[
             "SignalRank",
             "PriceNum",
             "VolNum"
-        ]
+        ],
+        inplace=True
     )
 
-    st.success(f"Scanned {len(df)} Stocks")
+    st.success(
+        f"🎯 {len(df)} Momentum Stocks Found"
+    )
 
     st.dataframe(
         df,
         hide_index=True,
-        width="stretch"
+        use_container_width=True
     )

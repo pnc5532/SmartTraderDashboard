@@ -1,14 +1,11 @@
-from nselib import capital_market
+from data.market_cache import get_price_volume
 
 
 def check_volume_condition(symbol):
 
     try:
 
-        data = capital_market.price_volume_data(
-            symbol=symbol,
-            period="1M"
-        )
+        data = get_price_volume(symbol)
 
         volumes = (
             data["TotalTradedQuantity"]
@@ -17,10 +14,11 @@ def check_volume_condition(symbol):
         )
 
         today = volumes.iloc[0]
-
         avg20 = volumes.head(20).mean()
-
         high15 = volumes.head(15).max()
+
+        close = float(str(data["ClosePrice"].iloc[0]).replace(",", ""))
+        prev_close = float(str(data["PrevClose"].iloc[0]).replace(",", ""))
 
         return {
 
@@ -36,24 +34,15 @@ def check_volume_condition(symbol):
 
             "pass_high15": today >= high15,
 
-            "close": float(
-                str(data["ClosePrice"].iloc[0]).replace(",", "")
-            ),
+            "close": close,
 
-            "prev_close": float(
-                str(data["PrevClose"].iloc[0]).replace(",", "")
-            )
-            ,
+            "prev_close": prev_close,
+
             "price_change": round(
-                (
-                    float(str(data["ClosePrice"].iloc[0]).replace(",", "")) -
-                    float(str(data["PrevClose"].iloc[0]).replace(",", ""))
-                )
-                /
-                float(str(data["PrevClose"].iloc[0]).replace(",", ""))
-                * 100,
+                ((close - prev_close) / prev_close) * 100,
                 2
             )
+
         }
 
     except Exception as e:

@@ -1,15 +1,12 @@
-from nselib import capital_market
 import pandas as pd
+from data.market_cache import get_price_volume
 
 
 def check_breakout(symbol):
 
-    try:
+    try:        
 
-        data = capital_market.price_volume_data(
-            symbol=symbol,
-            period="1M"
-        )
+        data = get_price_volume(symbol)
 
         high = pd.to_numeric(
             data["HighPrice"]
