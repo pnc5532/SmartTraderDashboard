@@ -1,24 +1,38 @@
 from data.market_cache import get_price_volume
+from data.live_market import get_live_stock
 
 
 def check_volume_condition(symbol):
 
     try:
 
+        # Historical Data (20D Average & 15D High)
         data = get_price_volume(symbol)
+
+        # Live Data
+        live = get_live_stock(symbol)
+
+        if live is None:
+            return None
 
         volumes = (
             data["TotalTradedQuantity"]
-            .str.replace(",", "")
+            .astype(str)
+            .str.replace(",", "", regex=False)
             .astype(float)
         )
 
-        today = volumes.iloc[0]
         avg20 = volumes.head(20).mean()
         high15 = volumes.head(15).max()
 
-        close = float(str(data["ClosePrice"].iloc[0]).replace(",", ""))
-        prev_close = float(str(data["PrevClose"].iloc[0]).replace(",", ""))
+        # Live Volume
+        today = live["today_volume"]
+
+        # Live Price
+        close = live["close"]
+        prev_close = live["prev_close"]
+
+        ratio = round(today / avg20, 2)
 
         return {
 
@@ -28,7 +42,7 @@ def check_volume_condition(symbol):
 
             "high15": high15,
 
-            "ratio": round(today / avg20, 2),
+            "ratio": ratio,
 
             "pass_avg20": today >= avg20 * 2,
 
@@ -38,10 +52,7 @@ def check_volume_condition(symbol):
 
             "prev_close": prev_close,
 
-            "price_change": round(
-                ((close - prev_close) / prev_close) * 100,
-                2
-            )
+            "price_change": live["price_change"]
 
         }
 

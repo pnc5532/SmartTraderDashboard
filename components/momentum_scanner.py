@@ -3,11 +3,19 @@ import pandas as pd
 import time
 
 from concurrent.futures import ThreadPoolExecutor
+from data.scanner_engine import parallel_scan
+from data.live_market import clear_live_cache   
 
 from data.sector_mapping import SECTORS
 from data.volume_scanner import check_volume_condition
 from data.breakout_scanner import check_breakout
 from data.signal_time import update_signal_time
+from data.scanner_engine import (
+    parallel_scan,
+    calculate_price_strength,
+    calculate_volume_strength,
+    calculate_breakout_strength
+)
 
 
 def scan_stock(symbol):
@@ -33,29 +41,7 @@ def scan_stock(symbol):
         # PRICE STRENGTH
         # -------------------------
 
-        if price_change >= 5:
-            score += 40
-            reason.append("🔥 Strong Price")
-
-        elif price_change >= 3:
-            score += 30
-            reason.append("📈 Price Up")
-
-        elif price_change >= 1:
-            score += 15
-            reason.append("🟢 Positive")
-
-        elif price_change <= -5:
-            score += 40
-            reason.append("🔻 Strong Fall")
-
-        elif price_change <= -3:
-            score += 30
-            reason.append("📉 Price Down")
-
-        elif price_change <= -1:
-            score += 15
-            reason.append("🔴 Negative")
+        score += calculate_price_strength(price_change)
 
         # -------------------------
         # VOLUME
@@ -156,6 +142,8 @@ def scan_stock(symbol):
 
 def show_momentum_scanner():
 
+    clear_live_cache()
+
     st.subheader("🎯 Momentum Scanner")
 
     sector = st.selectbox(
@@ -172,16 +160,10 @@ def show_momentum_scanner():
 
         max_workers = min(8, len(stocks))
 
-        with ThreadPoolExecutor(max_workers=max_workers) as executor:
-
-            rows = list(
-                executor.map(
-                    scan_stock,
-                    stocks
-                )
-            )
-
-    rows = [r for r in rows if r is not None]
+        rows = parallel_scan(
+            stocks,
+            scan_stock
+        )
 
     end = time.perf_counter()
 
