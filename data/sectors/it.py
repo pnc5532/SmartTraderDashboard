@@ -5,7 +5,7 @@ IT = [
     "HCLTECH",
     "TECHM",
     "WIPRO",
-    "LTIM",
+    "LTM",
     "PERSISTENT",
     "COFORGE",
     "MPHASIS",

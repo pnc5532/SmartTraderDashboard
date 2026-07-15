@@ -12,6 +12,8 @@ def check_volume_condition(symbol):
         # Live Data
         live = get_live_stock(symbol)
 
+        print(symbol, live)
+
         if live is None:
             return None
 
@@ -26,7 +28,7 @@ def check_volume_condition(symbol):
         high15 = volumes.head(15).max()
 
         # Live Volume
-        today = live["today_volume"]
+        today = volumes.iloc[0]
 
         # Live Price
         close = live["close"]
