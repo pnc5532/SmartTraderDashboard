@@ -38,7 +38,7 @@ def scan_stock(stock):
     trend = analyze_trend(symbol)
 
     if trend is None:
-        #print(f"{symbol} -> Trend FAILED")
+        print(f"{symbol} -> Trend FAILED")
         return None
 
     print(
@@ -106,18 +106,44 @@ def scan_stock(stock):
     # Trend Stage
     # ==================================
 
-    stage = trend["trend_stage"]
-    action = trend["action"]
-    holding = trend["holding"]
-
-    # Confidence purane score se hi rahegi
     if score >= 90:
+
+        stage = "Stage 1"
+
+        action = "Fresh Entry"
+
+        holding = "7-15 Days"
+
         confidence = "95%"
+
     elif score >= 75:
+
+        stage = "Stage 2"
+
+        action = "Add on Dip"
+
+        holding = "5-10 Days"
+
         confidence = "85%"
+
     elif score >= 60:
+
+        stage = "Stage 3"
+
+        action = "Trail SL"
+
+        holding = "2-5 Days"
+
         confidence = "75%"
+
     else:
+
+        stage = "Stage 4"
+
+        action = "Exit / Avoid"
+
+        holding = "-"
+
         confidence = "40%"
 
     return {
